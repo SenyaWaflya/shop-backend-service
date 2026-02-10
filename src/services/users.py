@@ -10,9 +10,6 @@ class UsersService:
         exists_user = await UsersRepository.check_exists_user(user_dto.tg_id)
         if exists_user:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='User already exists')
-        exists_email = await UsersRepository.check_exists_email(user_dto.email)
-        if exists_email:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='Email already exists')
         user_model = await UsersRepository.add(user_dto)
         return UserResponse.model_validate(user_model)
 

@@ -11,21 +11,13 @@ class BaseModel(AsyncAttrs, DeclarativeBase):
     updated_at: Mapped[datetime] = mapped_column(nullable=False, server_default=func.now(), server_onupdate=func.now())
 
 
-class UserProductModel(BaseModel):
-    __tablename__ = 'users_product_association'
-
-    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
-    product_id: Mapped[int] = mapped_column(ForeignKey('products.id'), nullable=False)
-
-
 class UserModel(BaseModel):
     __tablename__ = 'users'
 
     tg_id: Mapped[str] = mapped_column(unique=True, index=True, nullable=False)
     username: Mapped[str] = mapped_column(unique=True, nullable=False)
-    email: Mapped[str] = mapped_column(unique=True)
 
-    products = relationship('ProductModel', secondary='users_product_association', back_populates='users')
+    cart: Mapped['CartModel'] = relationship(back_populates='user', uselist=False)
 
 
 class ProductModel(BaseModel):
@@ -37,4 +29,23 @@ class ProductModel(BaseModel):
     quantity: Mapped[int] = mapped_column(nullable=False)
     image_path: Mapped[str] = mapped_column(unique=True)
 
-    users = relationship('UserModel', secondary='users_product_association', back_populates='products')
+
+class CartModel(BaseModel):
+    __tablename__ = 'carts'
+
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
+    status: Mapped[str] = mapped_column(nullable=False, default='active')
+
+    user: Mapped['UserModel'] = relationship(back_populates='cart')
+    items: Mapped[list['CartItemModel']] = relationship(back_populates='cart', cascade='all, delete-orphan')
+
+
+class CartItemModel(BaseModel):
+    __tablename__ = 'cart_items'
+
+    cart_id: Mapped[int] = mapped_column(ForeignKey('carts.id', ondelete='CASCADE'), nullable=False, index=True)
+    product_id: Mapped[int] = mapped_column(ForeignKey('products.id', ondelete='CASCADE'), nullable=False)
+    quantity: Mapped[int] = mapped_column(nullable=False, default=1)
+
+    cart: Mapped['CartModel'] = relationship(back_populates='items')
+    product: Mapped['ProductModel'] = relationship()

@@ -1,4 +1,3 @@
-from pydantic import EmailStr
 from sqlalchemy.sql import exists, select
 
 from src.database.connection import async_session
@@ -16,17 +15,9 @@ class UsersRepository:
             return user_exists
 
     @staticmethod
-    async def check_exists_email(email: EmailStr) -> bool:
-        async with async_session() as session:
-            query = select(exists().where(UserModel.email == email))
-            result = await session.execute(query)
-            email_exists = result.scalar()
-            return email_exists
-
-    @staticmethod
     async def add(user_dto: UserDto) -> UserModel:
         async with async_session() as session:
-            user_model = UserModel(tg_id=user_dto.tg_id, username=user_dto.username, email=user_dto.email)
+            user_model = UserModel(tg_id=user_dto.tg_id, username=user_dto.username)
             session.add(user_model)
             await session.commit()
             await session.refresh(user_model)

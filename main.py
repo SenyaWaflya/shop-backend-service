@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
 from src.database.connection import create_tables, engine
+from src.routers.carts import carts_router
 from src.routers.products import products_router
 from src.routers.users import users_router
 
@@ -23,6 +24,7 @@ app = FastAPI(title='Mobiles shop', swagger_ui_parameters=swagger_ui_parameters,
 
 app.include_router(users_router)
 app.include_router(products_router)
+app.include_router(carts_router)
 
 
 @app.get('/')
