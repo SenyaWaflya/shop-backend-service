@@ -1,4 +1,5 @@
 from sqlalchemy.sql import select
+from sqlalchemy.orm import selectinload
 
 from src.database.connection import async_session
 from src.database.models import CartItemModel
@@ -26,4 +27,16 @@ class CartItemsRepository:
             cart_item_model.quantity = cart_item_model.quantity + cart_item_dto.quantity
             await session.commit()
             await session.refresh(cart_item_model, attribute_names=['product'])
+            return cart_item_model
+
+    @staticmethod
+    async def delete(cart_id: int, product_id: int) -> CartItemModel:
+        async with async_session() as session:
+            query = select(CartItemModel).where(
+                CartItemModel.cart_id == cart_id, CartItemModel.product_id == product_id
+            ).options(selectinload(CartItemModel.product))
+            result = await session.execute(query)
+            cart_item_model = result.scalar_one()
+            await session.delete(cart_item_model)
+            await session.commit()
             return cart_item_model

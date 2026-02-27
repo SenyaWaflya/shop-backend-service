@@ -28,3 +28,13 @@ class CartsRepository:
             await session.commit()
             await session.refresh(cart_model)
             return cart_model
+
+    @staticmethod
+    async def delete(user_id: int) -> CartModel:
+        async with async_session() as session:
+            query = select(CartModel).where(CartModel.user_id == user_id)
+            result = await session.execute(query)
+            cart_model = result.scalar_one()
+            await session.delete(cart_model)
+            await session.commit()
+            return cart_model

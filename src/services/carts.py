@@ -36,3 +36,17 @@ class CartsService:
         if cart_model is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Cart not found')
         return CartResponse.model_validate(cart_model)
+
+    @staticmethod
+    async def delete_product(user_id: int, product_id: int) -> CartItemResponse:
+        cart_model = await CartsRepository.get(user_id=user_id)
+        if cart_model is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Cart not found')
+        cart = CartResponse.model_validate(cart_model)
+        cart_item_model = await CartItemsRepository.delete(cart_id=cart.id, product_id=product_id)
+        return CartItemResponse.model_validate(cart_item_model)
+
+    @staticmethod
+    async def delete_cart(user_id: int) -> CartResponse:
+        cart_model = await CartsRepository.delete(user_id=user_id)
+        return CartResponse.model_validate(cart_model)

@@ -21,3 +21,16 @@ async def add_product(
 @carts_router.get('/{user_id}', summary='Get active cart')
 async def get_cart(user_id: Annotated[int, Path(description='ID пользователя', examples=['1'])]) -> CartResponse:
     return await CartsService.get_active_cart(user_id=user_id)
+
+
+@carts_router.delete('/{user_id}/{product_id}', summary='Delete item from cart')
+async def delete_product(
+    user_id: Annotated[int, Path(description='ID пользователя', examples=['1'])],
+    product_id: Annotated[int, Path(description='ID товара, который необходимо удалить', examples=['1'])],
+) -> CartItemResponse:
+    return await CartsService.delete_product(user_id=user_id, product_id=product_id)
+
+
+@carts_router.delete('/{user_id}', summary='Delete cart')
+async def delete_cart(user_id: Annotated[int, Path(description='ID пользователя', examples=['1'])]) -> CartResponse:
+    return await CartsService.delete_cart(user_id=user_id)
